@@ -59,6 +59,11 @@ property_type = st.sidebar.multiselect(
     default=["house", "apartment"]
 )
 
+max_city_dist = st.sidebar.slider("Max distance to city of 10,000+ (miles)", 1, 100, 50)
+max_hospital_dist = st.sidebar.slider("Max distance to hospital (miles)", 1, 100, 30)
+max_airport_dist = st.sidebar.slider("Max distance to airport (miles)", 1, 200, 75)
+near_americans = st.sidebar.checkbox("Near other American expats")
+
 # --- Filter the data ---
 selected_countries = all_countries if "All" in country else country
 
@@ -67,8 +72,14 @@ filtered = df[
     (df["Price"] >= price_range[0]) &
     (df["Price"] <= price_range[1]) &
     (df["SqFt"] >= min_sqft) &
-    (df["Type"].isin(property_type))
+    (df["Type"].isin(property_type)) &
+    (df["Miles to City"] <= max_city_dist) &
+    (df["Miles to Hospital"] <= max_hospital_dist) &
+    (df["Miles to Airport"] <= max_airport_dist)
 ]
+
+if near_americans:
+    filtered = filtered[filtered["Expat Community"] == True]
 
 # --- Display Results ---
 st.subheader(f"Results: {len(filtered):,} properties found")
@@ -93,6 +104,14 @@ else:
             col1.metric("Type", row["Type"].title())
             col2.metric("Size", f"{row['SqFt']:,} sq ft")
             col3.metric("Rooms", int(row["Rooms"]) if pd.notna(row["Rooms"]) else "N/A")
+
+            col4, col5, col6 = st.columns(3)
+            col4.metric("Nearest City (10k+)", f"{row['Miles to City']} mi")
+            col5.metric("Nearest Hospital", f"{row['Miles to Hospital']} mi")
+            col6.metric("Nearest Airport", f"{row['Miles to Airport']} mi")
+
+            expat_status = "✅ Yes" if row["Expat Community"] else "❌ No"
+            st.write(f"**American Expat Community Nearby:** {expat_status}")
 
             if pd.notna(row["Link"]):
                 st.markdown(f"🔗 [View Property Listing]({row['Link']})")

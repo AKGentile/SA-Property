@@ -1,0 +1,9 @@
+# Raw data files (too large for GitHub)
+DS_Proyecto_01_Datos_Properati.csv
+properati-AR-*.csv
+properati-BR-*.csv
+properati-MX-*.csv
+archive*.zip
+
+# Word doc
+*.docx
